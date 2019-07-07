@@ -21,6 +21,7 @@ var _parseFloat = _interopDefault(require('@babel/runtime-corejs2/core-js/parse-
 var _Set = _interopDefault(require('@babel/runtime-corejs2/core-js/set'));
 var _typeof = _interopDefault(require('@babel/runtime-corejs2/helpers/typeof'));
 var _getIterator = _interopDefault(require('@babel/runtime-corejs2/core-js/get-iterator'));
+var _Object$assign = _interopDefault(require('@babel/runtime-corejs2/core-js/object/assign'));
 var _Object$keys = _interopDefault(require('@babel/runtime-corejs2/core-js/object/keys'));
 var stringDirection = _interopDefault(require('string-direction'));
 var validUrl = _interopDefault(require('valid-url'));
@@ -7147,12 +7148,16 @@ function detectByHtml($) {
   return Detectors[selector];
 }
 
+var apiExtractors = {};
 function getExtractor(url, parsedUrl, $) {
   parsedUrl = parsedUrl || URL.parse(url);
   var _parsedUrl = parsedUrl,
       hostname = _parsedUrl.hostname;
   var baseDomain = hostname.split('.').slice(-2).join('.');
-  return Extractors[hostname] || Extractors[baseDomain] || detectByHtml($) || GenericExtractor;
+  return apiExtractors[hostname] || apiExtractors[baseDomain] || Extractors[hostname] || Extractors[baseDomain] || detectByHtml($) || GenericExtractor;
+}
+function addExtractor(extractor) {
+  if (extractor) _Object$assign(apiExtractors, mergeSupportedDomains(extractor));
 }
 
 function cleanBySelectors($content, $, _ref) {
@@ -7669,6 +7674,7 @@ var Mercury = {
 
     return parse;
   }(),
+  addExtractor: addExtractor,
   browser: !!cheerio.browser,
   // A convenience method for getting a resource
   // to work with, e.g., for custom extractor generator
